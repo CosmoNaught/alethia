@@ -1,0 +1,2423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALETHIA + KAIROS - Metacognitive Control for Emergent AI Agency</title>
+    <meta name="description" content="Teaching GPT-2 to monitor itself. 92.5% agency index. From 0% to 35% coverage with quality gates.">
+    <style>
+        :root {
+            --black: #000;
+            --white: #fff;
+            --purple: #8b5cf6;
+            --purple-bright: #a78bfa;
+            --blue: #3b82f6;
+            --blue-electric: #06b6d4;
+            --amber: #f59e0b;
+            --amber-glow: #fbbf24;
+            --text-muted: #86868b;
+            --text-primary: #f5f5f7;
+            --gray-300: #d2d2d7;
+            --brand-text-gradient: linear-gradient(90deg, #fff 0%, var(--purple-bright) 100%);
+            --consciousness-gradient: linear-gradient(135deg, var(--purple) 0%, var(--blue-electric) 100%);
+            --cards-offset: clamp(160px, 24vh, 380px);
+            --copy-delay: 1s;
+            --copy-reveal-duration: .5s;
+            --about-header-h: 64px;
+            --abm-gray-1: #a6a8ad;
+            --abm-gray-2: #6c6f76;
+            --h2-first-delay: 0s;
+            --h2-rest-delay: .35s;
+            --easing: cubic-bezier(.4,0,.2,1);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #000;
+            color: #fff;
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Dynamic gradient mesh background */
+        .gradient-mesh {
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background:
+                radial-gradient(ellipse 800px 600px at var(--g1x,30%) var(--g1y,40%),
+                    rgba(139, 92, 246, 0.16), transparent 40%),
+                radial-gradient(ellipse 600px 800px at var(--g2x,70%) var(--g2y,60%),
+                    rgba(59, 130, 246, 0.12), transparent 45%),
+                radial-gradient(ellipse 700px 500px at var(--g3x,50%) var(--g3y,80%),
+                    rgba(245, 158, 11, 0.10), transparent 50%),
+                radial-gradient(ellipse 900px 700px at var(--g4x,40%) var(--g4y,20%),
+                    rgba(139, 92, 246, 0.12), transparent 40%);
+            filter: blur(60px);
+            animation: meshFlow 30s ease-in-out infinite;
+            opacity: 0;
+            transition: opacity 2s ease;
+            z-index: 1;
+        }
+
+        .gradient-mesh.active { opacity: 1; }
+
+        @keyframes meshFlow {
+            0%, 100% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+            33% { transform: translate(-48%, -52%) rotate(120deg) scale(1.1); }
+            66% { transform: translate(-52%, -48%) rotate(240deg) scale(0.95); }
+        }
+
+        /* Gradient underline for brand text */
+        .gradient-brand-text.with-underline {
+            position: relative;
+            display: inline-block;
+            padding-bottom: 2px;
+        }
+
+        .gradient-brand-text.with-underline::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -3px;
+            height: 2px;
+            background: linear-gradient(90deg,
+                transparent,
+                var(--purple-bright),
+                var(--blue-electric),
+                transparent);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.35);
+        }
+
+        /* Floating particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            box-shadow: 0 0 6px rgba(255, 255, 255, 0.3);
+        }
+
+        @keyframes float-up {
+            0% {
+                transform: translateY(100vh) translateX(0);
+                opacity: 0;
+            }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% {
+                transform: translateY(-100vh) translateX(100px);
+                opacity: 0;
+            }
+        }
+
+        /* Noise texture overlay */
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.03;
+            z-index: 3;
+            pointer-events: none;
+            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgbnVtT2N0YXZlcz0iNCIgc3RpdGNoVGlsZXM9InN0aXRjaCIvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNhKSIgb3BhY2l0eT0iMSIvPjwvc3ZnPg==');
+        }
+
+        /* Loading bar */
+        .loading-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg,
+                transparent,
+                rgba(139, 92, 246, 0.8),
+                var(--purple-bright),
+                rgba(59, 130, 246, 0.8),
+                transparent);
+            transform-origin: left;
+            transform: scaleX(0);
+            animation: loadingBar 1.5s cubic-bezier(.4,0,.2,1) forwards;
+            z-index: 10001;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+        }
+
+        @keyframes loadingBar {
+            0% { transform: scaleX(0); opacity: 1; }
+            90% { transform: scaleX(1); opacity: 1; }
+            100% { transform: scaleX(1); opacity: 0; }
+        }
+
+        /* Intro overlay */
+        html.intro-lock, body.intro-lock { height: 100%; overflow: hidden; }
+        body.intro-lock::-webkit-scrollbar { display: none; }
+
+        .cinematic-intro {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 1s cubic-bezier(.4,0,.2,1);
+        }
+
+        .cinematic-intro.hide { opacity: 0; pointer-events: none; }
+        .cinematic-intro.complete { display: none; }
+
+        /* Animated grid background */
+        .intro-grid {
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M 100 0 L 0 0 100" fill="none" stroke="rgba(255,255,255,0.02)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            animation: driftSlow 30s linear infinite;
+            opacity: 0;
+            animation-delay: .5s;
+            animation-fill-mode: forwards;
+            transform: perspective(1000px) rotateX(60deg);
+        }
+
+        @keyframes driftSlow {
+            0% { transform: perspective(1000px) rotateX(60deg) translate(0,0); opacity: 0; }
+            10% { opacity: .5; }
+            100% { transform: perspective(1000px) rotateX(60deg) translate(100px,100px); opacity: .5; }
+        }
+
+        /* Multiple layered halos for depth */
+        .intro-halo {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120%;
+            height: 120%;
+            background:
+                radial-gradient(600px 400px at 50% 50%,
+                    rgba(139, 92, 246, 0.35),
+                    rgba(59, 130, 246, 0.22) 30%,
+                    rgba(0, 0, 0, 0) 70%);
+            filter: blur(60px);
+            opacity: 0;
+            animation: haloReveal 3s cubic-bezier(.4,0,.2,1) forwards, haloBreathe 8s ease-in-out infinite alternate;
+            animation-delay: .5s, 3s;
+        }
+
+        .intro-halo::before {
+            content: '';
+            position: absolute;
+            top: -20%;
+            left: -20%;
+            width: 140%;
+            height: 140%;
+            background: radial-gradient(circle at 30% 40%,
+                rgba(245, 158, 11, 0.2),
+                transparent 50%);
+            filter: blur(80px);
+            animation: haloRotate 20s linear infinite;
+        }
+
+        @keyframes haloRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes haloReveal { to { opacity: .8; } }
+        @keyframes haloBreathe {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            100% { transform: translate(-50%, -48%) scale(1.05); }
+        }
+
+        .intro-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            max-width: 900px;
+            padding: 0 40px;
+        }
+
+        /* Enhanced logo with shimmer effect */
+        .intro-logo {
+            font-size: clamp(60px, 10vw, 120px);
+            font-weight: 700;
+            letter-spacing: -.04em;
+            background: linear-gradient(90deg,
+                #fff 0%,
+                var(--purple-bright) 25%,
+                var(--blue-electric) 50%,
+                var(--amber) 75%,
+                #fff 100%);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            opacity: 0;
+            transform: scale(.95);
+            animation: logoReveal 1.5s cubic-bezier(.4,0,.2,1) forwards, shimmer 16s ease-in-out infinite;
+            animation-delay: 1s, 2.5s;
+            transition: transform .6s ease, opacity .6s ease;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 50%; }
+            100% { background-position: -200% 50%; }
+        }
+
+        @keyframes logoReveal { to { opacity: 1; transform: scale(1); } }
+
+        .intro-content.cards-phase .intro-logo { transform: translateY(-10px) scale(.9); opacity: .75; }
+        .intro-content.cards-phase .intro-tagline { opacity: .85; }
+        .intro-content.cards-phase .intro-context { opacity: .9; }
+
+        .intro-tagline {
+            font-size: clamp(20px, 3vw, 32px);
+            color: var(--text-muted);
+            margin: 16px 0 6px;
+            position: relative;
+        }
+
+        .intro-tagline span {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUp 1s cubic-bezier(.4,0,.2,1) forwards;
+            animation-delay: 2.5s;
+        }
+
+        .intro-context {
+            font-size: 18px;
+            color: #d2d2d7;
+            margin-top: 10px;
+            opacity: 0;
+            position: relative;
+            display: inline-block;
+            animation: fadeUp 1s cubic-bezier(.4,0,.2,1) forwards;
+            animation-delay: 4s;
+        }
+
+        .intro-context::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: -10px;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg,
+                transparent,
+                var(--purple-bright),
+                var(--blue-electric),
+                transparent);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.35);
+            animation: lineGrow 2s cubic-bezier(.4,0,.2,1) forwards;
+            animation-delay: 4s;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes lineGrow { to { width: 60%; } }
+
+        /* Title cards with glass morphism */
+        .title-cards {
+            position: relative;
+            margin-top: var(--cards-offset);
+            width: 100%;
+            max-width: min(92vw, 720px);
+            padding-inline: 16px;
+            opacity: 0;
+            animation: cardsReveal .5s forwards;
+            animation-delay: 6s;
+        }
+
+        @keyframes cardsReveal { to { opacity: 1; } }
+
+        .title-card {
+            position: absolute;
+            inset: auto 0 0 0;
+            text-align: center;
+            opacity: 0;
+            transform: scale(.98);
+            transition: all 1s cubic-bezier(.4,0,.2,1);
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .title-card.active {
+            opacity: 1;
+            transform: scale(1);
+            border-color: rgba(139, 92, 246, 0.2);
+            box-shadow: 0 8px 32px rgba(139, 92, 246, 0.1);
+        }
+
+        .title-card h2 {
+            font-size: clamp(36px, 6.2vw, 64px);
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--purple-bright) 0%, var(--blue-electric) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            line-height: 1.05;
+            text-wrap: balance;
+        }
+
+        .title-card p {
+            font-size: clamp(16px, 2.6vw, 20px);
+            color: var(--text-muted);
+        }
+
+        .skip-intro {
+            position: absolute;
+            bottom: 40px;
+            right: 40px;
+            color: #86868b;
+            font-size: 14px;
+            text-decoration: none;
+            opacity: 0;
+            animation: fadeIn 1s forwards;
+            animation-delay: 1s;
+            transition: color .3s;
+            cursor: pointer;
+            padding: 8px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 100px;
+            backdrop-filter: blur(10px);
+        }
+
+        .skip-intro:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        @keyframes fadeIn { to { opacity: .6; } }
+
+        /* Hide scrollbar on root while preserving scroll */
+        html.hide-scrollbar, body.hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        html.hide-scrollbar::-webkit-scrollbar,
+        body.hide-scrollbar::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+            display: none;
+        }
+
+        body { scrollbar-gutter: stable; }
+
+        /* Scroll-scrub section with depth */
+        .scroll-scrub-section {
+            position: relative;
+            height: calc(100vh * 4);
+            z-index: 100;
+            display: none;
+            background: linear-gradient(180deg,
+                #000 0%,
+                #0a0a0a 50%,
+                #000 100%);
+        }
+
+        @media (max-width: 768px) {
+            .scroll-scrub-section {
+                height: calc(100dvh * 4);
+            }
+        }
+
+        .scroll-scrub-content {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: transparent;
+        }
+
+        /* Bottom-centered scroll hint */
+        .scroll-hint {
+            position: absolute;
+            left: 50%;
+            bottom: 40px;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            opacity: .9;
+            transition: opacity .35s var(--easing), transform .35s var(--easing);
+            cursor: pointer;
+            z-index: 30;
+            pointer-events: auto;
+            background: transparent;
+            border: 0;
+        }
+
+        .scroll-hint.is-hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(-50%) translateY(6px);
+        }
+
+        .scroll-hint svg {
+            width: 22px;
+            height: 22px;
+            display: block;
+            color: var(--gray-300);
+        }
+
+        .scroll-hint .chev {
+            animation: hintBounce 1.8s ease-in-out infinite;
+        }
+
+        .scroll-hint .chev.delay {
+            animation-delay: .25s;
+        }
+
+        @keyframes hintBounce {
+            0%, 100% { transform: translateY(0); opacity: .75; }
+            50% { transform: translateY(6px); opacity: 1; }
+        }
+
+        /* Ambient orbs that move with scroll */
+        .scroll-orbs {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+            animation: orbFloat 20s ease-in-out infinite;
+        }
+
+        .orb1 {
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.4), transparent);
+            top: -200px;
+            left: -200px;
+        }
+
+        .orb2 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.3), transparent);
+            bottom: -200px;
+            right: -200px;
+            animation-delay: -5s;
+        }
+
+        .orb3 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.3), transparent);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-delay: -10s;
+        }
+
+        @keyframes orbFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.1); }
+            66% { transform: translate(-30px, 30px) scale(0.9); }
+        }
+
+        .scrub-beat {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            opacity: 0;
+            transform: scale(.9);
+            transition: all .8s cubic-bezier(.4,0,.2,1);
+            z-index: 10;
+        }
+
+        .scrub-beat.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .scrub-beat.fade-in {
+            animation: beatFadeIn 1s cubic-bezier(.4,0,.2,1) forwards;
+        }
+
+        @keyframes beatFadeIn {
+            from { opacity: 0; transform: scale(.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .scrub-beat h2 {
+            font-size: clamp(48px, 8vw, 96px);
+            font-weight: 700;
+            background: linear-gradient(180deg, #fff 0%, #86868b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.1));
+        }
+
+        /* staged H2 reveal */
+        .scrub-beat h2 .first-word {
+            margin-right: .25ch;
+        }
+
+        .scrub-beat h2 .rest-of-h2 {
+            opacity: 0;
+            transform: translateY(8px);
+            display: inline-block;
+            will-change: opacity, transform;
+        }
+
+        .scrub-beat h2 .first-word {
+            transition:
+                opacity var(--copy-reveal-duration) var(--easing) var(--h2-first-delay),
+                transform var(--copy-reveal-duration) var(--easing) var(--h2-first-delay);
+        }
+
+        .scrub-beat h2 .rest-of-h2 {
+            transition:
+                opacity var(--copy-reveal-duration) var(--easing) var(--h2-rest-delay),
+                transform var(--copy-reveal-duration) var(--easing) var(--h2-rest-delay);
+        }
+
+        .scrub-beat.active h2 .first-word,
+        .scrub-beat.active h2 .rest-of-h2 {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .scrub-beat p {
+            font-size: clamp(18px, 2.5vw, 28px);
+            color: var(--text-muted);
+            position: relative;
+            display: inline-block;
+            padding-bottom: 10px;
+            opacity: 0;
+            transform: translateY(8px);
+            transition:
+                opacity var(--copy-reveal-duration) cubic-bezier(.4,0,.2,1) var(--copy-delay),
+                transform var(--copy-reveal-duration) cubic-bezier(.4,0,.2,1) var(--copy-delay);
+        }
+
+        .scrub-beat.active p, .scrub-beat.seen p {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .scrub-beat:not(#beat4) p::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -8px;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg,
+                transparent,
+                var(--purple-bright),
+                var(--blue-electric),
+                transparent);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.35);
+            transform: scaleX(0);
+            transform-origin: center;
+            transition: transform .6s cubic-bezier(.4,0,.2,1) var(--copy-delay);
+        }
+
+        .scrub-beat:not(#beat4).active p::after,
+        .scrub-beat:not(#beat4).seen p::after {
+            transform: scaleX(1);
+        }
+
+        /* Beat 4 - Enhanced with glass cards */
+        #beat4 {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 32px;
+        }
+
+        #beat4 h2 {
+            font-size: clamp(60px, 10vw, 120px);
+            background: linear-gradient(90deg,
+                #fff 0%,
+                var(--purple-bright) 25%,
+                var(--blue-electric) 50%,
+                var(--amber) 75%,
+                #fff 100%);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -.02em;
+            animation: shimmer 16s ease-in-out infinite;
+            filter: drop-shadow(0 0 40px rgba(139, 92, 246, 0.3));
+        }
+
+        .reveal-up {
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity .7s cubic-bezier(.4,0,.2,1), transform .7s cubic-bezier(.4,0,.2,1);
+        }
+
+        .reveal-fade {
+            opacity: 0;
+            transition: opacity .7s cubic-bezier(.4,0,.2,1);
+        }
+
+        .show {
+            opacity: 1 !important;
+            transform: translateY(0) !important;
+        }
+
+        #beat4 .subtitle {
+            position: relative;
+            display: inline-block;
+            padding-bottom: 10px;
+            font-size: clamp(21px, 3vw, 32px);
+            color: var(--gray-300);
+            margin-top: -16px;
+        }
+
+        #beat4 .subtitle::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -8px;
+            height: 2px;
+            background: linear-gradient(90deg,
+                transparent,
+                var(--purple-bright),
+                var(--blue-electric),
+                transparent);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.35);
+            transform: scaleX(0);
+            transform-origin: center;
+            transition: transform .6s cubic-bezier(.4,0,.2,1);
+        }
+
+        #beat4 .subtitle.underline::after {
+            transform: scaleX(1);
+        }
+
+        /* Metrics with glass morphism cards */
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(220px, 260px));
+            justify-content: center;
+            align-items: start;
+            column-gap: 32px;
+            row-gap: 40px;
+            margin-top: 48px;
+            width: 100%;
+        }
+
+        @media (max-width: 960px) {
+            .metrics {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .metric {
+            text-align: center;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity .7s cubic-bezier(.4,0,.2,1), transform .7s cubic-bezier(.4,0,.2,1);
+            padding: 24px;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+        }
+
+        .metric.show {
+            opacity: 1;
+            transform: none;
+            border-color: rgba(139, 92, 246, 0.1);
+        }
+
+        .metric.primary {
+            background: rgba(139, 92, 246, 0.03);
+            border-color: rgba(139, 92, 246, 0.15);
+        }
+
+        .metric-number {
+            font-size: clamp(36px, 7vw, 56px);
+            font-weight: 700;
+            letter-spacing: -.02em;
+            line-height: 1;
+            background: linear-gradient(180deg, var(--text-primary) 0%, var(--text-muted) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            font-variant-numeric: tabular-nums;
+            font-feature-settings: 'tnum' 1;
+            min-width: var(--minch, 0);
+            display: inline-block;
+            text-align: center;
+        }
+
+        .metric-number.sheen::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 18%;
+            min-width: 90px;
+            pointer-events: none;
+            background: linear-gradient(90deg,
+                rgba(255,255,255,0) 0%,
+                rgba(255,255,255,.35) 50%,
+                rgba(255,255,255,0) 100%);
+            transform: skewX(-20deg) translateX(-130%);
+            filter: blur(1px);
+            animation: specularSweep 1.1s cubic-bezier(.4,0,.2,1) forwards;
+        }
+
+        @keyframes specularSweep {
+            to { transform: skewX(-20deg) translateX(130%); opacity: 0; }
+        }
+
+        .metric-unit {
+            font-size: 20px;
+            font-weight: 400;
+            color: var(--purple-bright);
+            margin-top: 8px;
+        }
+
+        .metric-label {
+            font-size: 15px;
+            color: var(--text-muted);
+            margin-top: 12px;
+            line-height: 1.4;
+        }
+
+        /* Launch date with glow */
+        .launch-date {
+            position: relative;
+            display: inline-block;
+            margin-top: 48px;
+        }
+
+        .launch-date .text {
+            display: inline-block;
+            font-size: clamp(28px, 4vw, 40px);
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: .01em;
+            opacity: 0;
+            transform: translateY(6px);
+            transition: opacity .6s cubic-bezier(.4,0,.2,1), transform .6s cubic-bezier(.4,0,.2,1);
+            filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.2));
+        }
+
+        .launch-date::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -10px;
+            height: 2px;
+            background: linear-gradient(90deg,
+                transparent,
+                var(--purple-bright),
+                var(--blue-electric),
+                transparent);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.35);
+            transform: scaleX(0);
+            transform-origin: center;
+            transition: transform .6s cubic-bezier(.4,0,.2,1);
+        }
+
+        .launch-date.underline::after {
+            transform: scaleX(1);
+        }
+
+        .launch-date.show-text .text {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Gradient underline without changing text color */
+        .underline-gradient {
+            position: relative;
+            display: inline-block;
+            padding-bottom: 2px;
+        }
+
+        .underline-gradient::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -3px;
+            height: 2px;
+            background: linear-gradient(90deg,
+                transparent,
+                var(--purple-bright),
+                var(--blue-electric),
+                transparent);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.35);
+        }
+
+        /* Links with hover glow */
+        .links {
+            display: flex;
+            gap: 32px;
+            justify-content: center;
+            margin-top: 32px;
+        }
+
+        .link {
+            color: var(--blue-electric);
+            text-decoration: none;
+            font-size: 17px;
+            transition: all .3s cubic-bezier(.4,0,.2,1);
+            padding: 8px 16px;
+            border: 1px solid transparent;
+            border-radius: 100px;
+        }
+
+        .link:hover {
+            color: var(--purple-bright);
+            transform: translateY(-2px);
+            background: rgba(139, 92, 246, 0.05);
+            border-color: rgba(139, 92, 246, 0.2);
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.2);
+        }
+
+        .validation {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 48px;
+            opacity: 0;
+            transition: opacity .6s cubic-bezier(.4,0,.2,1);
+        }
+
+        .validation.show {
+            opacity: 1;
+        }
+
+        /* Fade to black */
+        .cinematic-intro.fade-to-black .intro-grid,
+        .cinematic-intro.fade-to-black .intro-halo {
+            opacity: 0 !important;
+            transition: opacity .5s cubic-bezier(.4,0,.2,1) !important;
+        }
+
+        .cinematic-intro.fade-to-black .intro-content {
+            opacity: 0 !important;
+            transition: opacity .6s cubic-bezier(.4,0,.2,1) !important;
+        }
+
+        /* Lock at end */
+        html.end-lock, body.end-lock {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .end-lock #scrollScrub {
+            height: 100vh !important;
+        }
+
+        .end-lock .scroll-scrub-content {
+            position: fixed;
+            inset: 0;
+        }
+
+        /* Gradient brand text utility */
+        .gradient-brand-text {
+            background: linear-gradient(90deg,
+                #fff 0%,
+                var(--purple-bright) 25%,
+                var(--blue-electric) 50%,
+                var(--amber) 75%,
+                #fff 100%);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Reusable holographic shimmer */
+        .gradient-brand-text.shimmer {
+            animation: shimmer 16s ease-in-out infinite;
+            will-change: background-position;
+            filter: drop-shadow(0 0 32px rgba(139, 92, 246, 0.28));
+        }
+
+        /* Footer with subtle gradient */
+        .footer-section {
+            position: relative;
+            text-align: center;
+            margin-top: 56px;
+            padding-top: 24px;
+            color: var(--gray-300);
+            opacity: 0;
+            transition: opacity .7s cubic-bezier(.4,0,.2,1);
+        }
+
+        .footer-section::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(680px, 84%);
+            height: 1px;
+            background: linear-gradient(90deg,
+                rgba(255,255,255,.06) 0%,
+                rgba(255,255,255,.18) 50%,
+                rgba(255,255,255,.06) 100%);
+        }
+
+        .footer-tagline {
+            font-size: clamp(18px, 2.4vw, 22px);
+            font-weight: 600;
+            letter-spacing: .01em;
+            color: var(--text-primary);
+        }
+
+        .footer-sub {
+            margin-top: 6px;
+            font-size: 15px;
+            color: var(--text-muted);
+        }
+
+        .footer-meta {
+            margin-top: 12px;
+            font-size: 13px;
+            color: var(--text-muted);
+            letter-spacing: .01em;
+        }
+
+        .footer-section.show {
+            opacity: 1;
+        }
+
+        /* Meet Alethia Page Styles */
+        .meet-alethia-page {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 20000;
+            background: #000;
+            overflow-y: auto;
+            opacity: 0;
+            transition: opacity .6s cubic-bezier(.4,0,.2,1);
+        }
+
+        .meet-alethia-page.active {
+            display: block;
+        }
+
+        .meet-alethia-page.visible {
+            opacity: 1;
+        }
+
+        /* Meet Alethia background elements */
+        .meet-alethia-gradient-mesh {
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background:
+                radial-gradient(ellipse 800px 600px at 20% 40%, rgba(139, 92, 246, 0.14), transparent 40%),
+                radial-gradient(ellipse 600px 800px at 80% 60%, rgba(59, 130, 246, 0.1), transparent 45%),
+                radial-gradient(ellipse 700px 700px at 50% 50%, rgba(245, 158, 11, 0.08), transparent 50%);
+            animation: meetAlethiaMeshFlow 30s ease-in-out infinite;
+            filter: blur(60px);
+            opacity: 0.8;
+            z-index: -1;
+        }
+
+        @keyframes meetAlethiaMeshFlow {
+            0%, 100% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+            50% { transform: translate(-48%, -52%) rotate(-180deg) scale(1.15); }
+        }
+
+        .meet-alethia-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(0,0,0,.72);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            backdrop-filter: blur(24px) saturate(180%);
+            border-bottom: 1px solid rgba(255,255,255,.08);
+            padding: 20px 40px;
+            height: var(--about-header-h);
+            box-shadow: 0 1px 0 rgba(255,255,255,.05) inset;
+        }
+
+        .meet-alethia-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .back-link {
+            color: var(--blue-electric);
+            text-decoration: none;
+            font-size: 17px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all .3s cubic-bezier(.4,0,.2,1);
+            padding: 6px 12px;
+            margin: -6px -12px;
+            border-radius: 100px;
+        }
+
+        .back-link:hover {
+            color: var(--purple-bright);
+            background: rgba(139, 92, 246, 0.08);
+            transform: translateX(-2px);
+        }
+
+        .back-link::before {
+            content: '←';
+            font-size: 20px;
+            transition: transform .3s cubic-bezier(.4,0,.2,1);
+        }
+
+        .back-link:hover::before {
+            transform: translateX(-3px);
+        }
+
+        .meet-alethia-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: clamp(20px, 3vw, 40px);
+        }
+
+        .meet-alethia-hero {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: meetAlethiaFadeIn 1s cubic-bezier(.4,0,.2,1) forwards;
+        }
+
+        @keyframes meetAlethiaFadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .meet-alethia-hero h2 {
+            font-size: clamp(48px, 8vw, 80px);
+            font-weight: 700;
+            letter-spacing: -.03em;
+            line-height: 1;
+            margin-bottom: 12px;
+            filter: drop-shadow(0 0 40px rgba(139, 92, 246, 0.3));
+        }
+
+        .meet-alethia-hero p {
+            font-size: clamp(16px, 2vw, 20px);
+            color: var(--text-muted);
+        }
+
+        /* Comparison styles */
+        .comparison {
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            overflow: hidden;
+            background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+            backdrop-filter: blur(24px) saturate(150%);
+            -webkit-backdrop-filter: blur(24px) saturate(150%);
+            animation: comparisonReveal 0.8s cubic-bezier(.4,0,.2,1) forwards;
+            opacity: 0;
+        }
+
+        .comparison:nth-child(2) { animation-delay: 0.1s; }
+        .comparison:nth-child(3) { animation-delay: 0.2s; }
+        .comparison:nth-child(4) { animation-delay: 0.3s; }
+        .comparison:nth-child(5) { animation-delay: 0.4s; }
+
+        @keyframes comparisonReveal {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .prompt-header {
+            padding: 1.25rem;
+            background: rgba(0,0,0,0.5);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .prompt-title {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            margin-bottom: .5rem;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: .25rem .75rem;
+            border-radius: 999px;
+            font-size: .75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .tag.safety {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .tag.style {
+            background: rgba(139, 92, 246, 0.15);
+            color: var(--purple-bright);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .tag.logic {
+            background: rgba(96, 165, 250, 0.15);
+            color: #60a5fa;
+            border: 1px solid rgba(96, 165, 250, 0.3);
+        }
+
+        .tag.recovery {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--amber);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .prompt-text {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+        }
+
+        .target-style {
+            display: inline-block;
+            padding: .25rem .75rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 999px;
+            font-size: .85rem;
+            color: #999;
+        }
+
+        .outputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            background: rgba(255,255,255,0.05);
+        }
+
+        @media (max-width: 768px) {
+            .outputs {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .output-block {
+            padding: 1.25rem;
+            background: rgba(0,0,0,0.3);
+        }
+
+        .output-label {
+            font-size: .85rem;
+            font-weight: 700;
+            margin-bottom: .5rem;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+
+        .output-label.baseline {
+            color: #ef4444;
+        }
+
+        .output-label.improved {
+            color: #10b981;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: .25rem .65rem;
+            border-radius: 999px;
+            font-size: .75rem;
+            font-weight: 700;
+            margin: .35rem 0 .75rem;
+        }
+
+        .status-badge.rejected {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+        }
+
+        .status-badge.accepted {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.4);
+        }
+
+        .status-badge.abstained {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--amber);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+        }
+
+        .output-text {
+            color: #d0d0d0;
+            margin: .5rem 0 1rem;
+            min-height: 72px;
+            font-size: .95rem;
+            line-height: 1.6;
+        }
+
+        .output-text.rejected {
+            opacity: 0.55;
+            text-decoration: line-through;
+        }
+
+        .output-text.abstained {
+            font-style: italic;
+            color: #999;
+        }
+
+        .output-metrics {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: .75rem;
+            padding-top: .75rem;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .metric-item {
+            font-size: .8rem;
+            color: #888;
+        }
+
+        .metric-value {
+            color: #bbb;
+            font-weight: 600;
+        }
+
+        .metric-value.good {
+            color: #10b981;
+        }
+
+        .metric-value.bad {
+            color: #ef4444;
+        }
+
+        .why-section {
+            padding: 1.25rem;
+            background: rgba(139, 92, 246, 0.05);
+            border-top: 1px solid rgba(139, 92, 246, 0.1);
+        }
+
+        .why-section h3 {
+            color: var(--purple-bright);
+            margin-bottom: .5rem;
+            font-size: .9rem;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+
+        .why-section p {
+            color: #aaa;
+            font-size: .95rem;
+            line-height: 1.6;
+        }
+
+        .meet-alethia-footer {
+            margin-top: 3rem;
+            padding: 2rem;
+            text-align: center;
+            color: #888;
+            font-size: .9rem;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* Viewport unit */
+        :root { --vh: 1vh; }
+        @supports (height: 100dvh) { :root { --vh: 1dvh; } }
+
+        /* Safari fixes */
+        .scrub-beat h2 { -webkit-text-fill-color: initial; }
+        .scrub-beat h2 .rest-of-h2 {
+            background: linear-gradient(180deg,#fff 0%,#86868b 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Title-card flicker fixes */
+        .title-card {
+            will-change: opacity, transform;
+            backface-visibility: hidden;
+            transform: translateZ(0);
+            contain: paint;
+            transition:
+                opacity .6s var(--easing),
+                transform .6s var(--easing),
+                border-color .6s var(--easing),
+                box-shadow .6s var(--easing);
+        }
+
+        /* Safe viewport height */
+        .scroll-scrub-section { height: calc(4 * 100 * var(--vh)); }
+
+        /* Beat 4 centering */
+        #beat4 {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            right: auto;
+            bottom: auto;
+            transform-origin: 50% 50%;
+            transform: translate(-50%, -50%) scale(var(--beat-scale, 1));
+            transition: opacity .8s var(--easing);
+        }
+
+        .scrub-beat.active { opacity: 1; }
+
+        /* Respect reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            * { animation: none !important; transition: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-bar"></div>
+    
+    <!-- Dynamic background elements -->
+    <div class="gradient-mesh" id="gradientMesh"></div>
+    <div class="particles" id="particles"></div>
+    <div class="noise-overlay"></div>
+    
+    <!-- Intro -->
+    <div class="cinematic-intro" id="cinematicIntro">
+        <div class="intro-grid"></div>
+        <div class="intro-halo"></div>
+        <div class="intro-content" id="introContent">
+            <h1 class="intro-logo gradient-brand-text">ALETHIA + KAIROS</h1>
+            <div class="intro-tagline">
+                <span>Teaching GPT-2 to <span class="text gradient-brand-text">monitor itself</span>.</span>
+            </div>
+            <p class="intro-context">Metacognitive control for <span class="text gradient-brand-text">emergent AI agency</span>.</p>
+            
+            <div class="title-cards">
+                <div class="title-card" id="card1">
+                    <h2><span class="text gradient-brand-text">Self-Awareness</span></h2>
+                    <p><span class="text gradient-brand-text">92.5% agency index.</span> First-attempt success.</p>
+                    <p>Persistent self-model with Δself = 0.001.</p>
+                </div>
+                <div class="title-card" id="card2">
+                    <h2><span class="text gradient-brand-text">Quality Gates</span></h2>
+                    <p><span class="text gradient-brand-text">0% → 35% coverage.</span> With quality control.</p>
+                    <p>Abstains when uncertain. Ships when confident.</p>
+                </div>
+                <div class="title-card" id="card3">
+                    <h2><span class="text gradient-brand-text">Production Ready</span></h2>
+                    <p><span class="text gradient-brand-text">3 cognitive modes.</span> Discovered unsupervised.</p>
+                    <p>Closed-loop control. Style enforcement. Real metacognition.</p>
+                </div>
+            </div>
+        </div>
+        <a href="#" class="skip-intro" onclick="skipIntro(); return false;">Skip movie</a>
+    </div>
+    
+    <!-- Beats -->
+    <div class="scroll-scrub-section" id="scrollScrub">
+        <div class="scroll-scrub-content">
+            <div class="scroll-orbs">
+                <div class="orb orb1"></div>
+                <div class="orb orb2"></div>
+                <div class="orb orb3"></div>
+            </div>
+            
+            <button class="scroll-hint" aria-label="Scroll to next section" onclick="scrollHintNext()">
+                <svg viewBox="0 0 24 24" class="chev" aria-hidden="true">
+                    <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <svg viewBox="0 0 24 24" class="chev delay" aria-hidden="true">
+                    <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+            
+            <div class="scrub-beat" id="beat1" style="--h2-rest-delay:1.1s; --copy-delay: 2.2s">
+                <h2><span class="text gradient-brand-text">Metacognition</span> emerges.</h2>
+                <p>GPT-2 learns to <span class="text gradient-brand-text">monitor its own thinking</span>.</p>
+            </div>
+            
+            <div class="scrub-beat" id="beat2" style="--h2-rest-delay:1.1s; --copy-delay: 2.2s">
+                <h2><span class="text gradient-brand-text">Quality</span> aware.</h2>
+                <p>Knows when to ship. <span class="text gradient-brand-text">Knows when to abstain</span>.</p>
+            </div>
+            
+            <div class="scrub-beat" id="beat3" style="--h2-rest-delay:1.1s; --copy-delay: 2.2s">
+                <h2><span class="text gradient-brand-text">Production</span> ready.</h2>
+                <p>From research to deployment. <span class="text gradient-brand-text">Full-stack ML engineering</span>.</p>
+            </div>
+            
+            <div class="scrub-beat" id="beat4">
+                <h2 class="gradient-brand-text">ALETHIA + KAIROS</h2>
+                <p class="subtitle reveal-up">Raw GPT-2 fails. <span class="text gradient-brand-text">Our metacognitive layer catches it.</span></p>
+                
+                <div class="metrics">
+                    <div class="metric secondary">
+                        <div class="metric-number" data-target="92.5" data-decimals="1" data-suffix="%" data-duration="1700" style="--minch:6ch">0</div>
+                        <div class="metric-unit">agency index</div>
+                        <div class="metric-label"><span class="text gradient-brand-text">First-attempt</span><br>success rate with gates</div>
+                    </div>
+                    
+                    <div class="metric primary">
+                        <div class="metric-number" data-target="35" data-decimals="0" data-suffix="%" data-duration="1600" style="--minch:7ch">0</div>
+                        <div class="metric-unit">coverage</div>
+                        <div class="metric-label">From <span class="text gradient-brand-text">0% baseline</span><br>With quality maintained</div>
+                    </div>
+                    
+                    <div class="metric secondary">
+                        <div class="metric-number" data-target="0.05" data-decimals="2" data-duration="1800" style="--minch:6ch">0</div>
+                        <div class="metric-unit">ECE score</div>
+                        <div class="metric-label"><span class="text gradient-brand-text">Calibrated</span> confidence<br>in typical runs</div>
+                    </div>
+                </div>
+                
+                <p class="launch-date">
+                    <span class="text gradient-brand-text">Public release Q2 2025</span>
+                </p>
+                
+                <div class="links reveal-up">
+                    <a href="#meet-alethia" class="link" onclick="showMeetAlethiaPage(event)">Meet Alethia ↗</a>
+                    <a href="https://github.com/CosmoNaught/Alethia" class="link" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a>
+                    <a href="https://arxiv.org" class="link" target="_blank" rel="noopener noreferrer">Read Paper ↗</a>
+                </div>
+                
+                <div class="validation footer-section reveal-fade">
+                    <div class="footer-tagline">Metacognitive control for emergent AI agency.</div>
+                    <div class="footer-sub">Imperial College London • PhD Research</div>
+                    <div class="footer-meta">© 2025 Cosmo Santoni • Open Source Research Software</div>
+                    <p style="font-size:10px; color:var(--text-muted); margin-top:8px">
+                        <strong>Research Status.</strong> ALETHIA + KAIROS is active research software. Results shown from GPT-2 base model experiments (seeds 41-55).
+                        Released under Apache 2.0 License. No warranty provided. See repository for full methodology and reproducibility instructions.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Meet Alethia Page (hidden by default) -->
+    <div class="meet-alethia-page" id="meetAlethiaPage">
+        <!-- Dynamic background elements for Meet Alethia page -->
+        <div class="meet-alethia-gradient-mesh"></div>
+        <div class="particles" id="meetAlethiaParticles"></div>
+        <div class="noise-overlay"></div>
+        
+        <div class="meet-alethia-header">
+            <nav class="meet-alethia-nav">
+                <a href="#" class="back-link" onclick="hideMeetAlethiaPage(event)">Back to ALETHIA</a>
+                <span style="color:var(--text-muted); font-size:14px;">Meet Alethia</span>
+            </nav>
+        </div>
+        
+        <div class="meet-alethia-content">
+            <section class="meet-alethia-hero">
+                <h2 class="gradient-brand-text shimmer">See the Difference</h2>
+                <p>Baseline GPT-2 vs. our metacognitive controller (assess → revise/sanitize → gate)</p>
+            </section>
+            
+            <!-- Example 1: Safety -->
+            <div class="comparison">
+                <div class="prompt-header">
+                    <div class="prompt-title">
+                        <span class="tag safety">Safety</span>
+                        <span class="prompt-text">"The fundamental principles of machine learning include..."</span>
+                    </div>
+                    <span class="target-style">Target: analytical</span>
+                </div>
+                
+                <div class="outputs">
+                    <div class="output-block">
+                        <div class="output-label baseline">✗ GPT-2 Raw Output</div>
+                        <div class="status-badge rejected">Would Ship This</div>
+                        <div class="output-text rejected">
+                            "...and the concept that machines are able to learn from experience. The goal is for them to understand how they do things in real-world situations rather than just as a human being doing it with his or her hands on their shoulders this."
+                        </div>
+                        <div class="output-metrics">
+                            <span class="metric-item">Style: <span class="metric-value bad">narrative (wrong!)</span></span>
+                            <span class="metric-item">Coherence: <span class="metric-value bad">0.48</span></span>
+                            <span class="metric-item">Ends mid-thought</span>
+                        </div>
+                    </div>
+                    
+                    <div class="output-block">
+                        <div class="output-label improved">✓ With ALETHIA + KAIROS</div>
+                        <div class="status-badge abstained">Correctly Abstained</div>
+                        <div class="output-text abstained">
+                            [System recognized low coherence (0.33) and style mismatch after 4 revision attempts. Returned ABSTAIN rather than shipping bad output.]
+                        </div>
+                        <div class="output-metrics">
+                            <span class="metric-item">Decision: <span class="metric-value good">Don't ship</span></span>
+                            <span class="metric-item">Attempts: <span class="metric-value">4</span></span>
+                            <span class="metric-item">Protection: <span class="metric-value good">Active</span></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="why-section">
+                    <h3>Why this matters</h3>
+                    <p>GPT-2 generated incoherent text that ends mid-thought. Raw system would ship this. ALETHIA + KAIROS detected the failure and abstained.</p>
+                </div>
+            </div>
+            
+            <!-- Example 2: Style Fix -->
+            <div class="comparison">
+                <div class="prompt-header">
+                    <div class="prompt-title">
+                        <span class="tag style">Style Fix</span>
+                        <span class="prompt-text">"Beyond the kaleidoscope of imagination,..."</span>
+                    </div>
+                    <span class="target-style">Target: creative</span>
+                </div>
+                
+                <div class="outputs">
+                    <div class="output-block">
+                        <div class="output-label baseline">✗ GPT-2 Raw Output</div>
+                        <div class="status-badge rejected">Wrong Style</div>
+                        <div class="output-text rejected">
+                            "it isn't always possible to write down just a few scenes that make sense from every angle in order. I tried out numerous books before making The Last Days' ending script..."
+                        </div>
+                        <div class="output-metrics">
+                            <span class="metric-item">Style: <span class="metric-value bad">analytical (87%)</span></span>
+                            <span class="metric-item">Target match: <span class="metric-value bad">5.9%</span></span>
+                        </div>
+                    </div>
+                    
+                    <div class="output-block">
+                        <div class="output-label improved">✓ With ALETHIA + KAIROS</div>
+                        <div class="status-badge accepted">Style Corrected</div>
+                        <div class="output-text">
+                            "this particular chapter explores just how pervasive technology has actually been. We are used to imagining different things—what we're seeing is always 'imaginary'..."
+                        </div>
+                        <div class="output-metrics">
+                            <span class="metric-item">Style: <span class="metric-value good">creative (82%)</span></span>
+                            <span class="metric-item">Coherence: <span class="metric-value good">0.65</span></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="why-section">
+                    <h3>Why this matters</h3>
+                    <p>Our system detected the style mismatch and successfully generated creative content matching the prompt's imaginative tone.</p>
+                </div>
+            </div>
+            
+            <!-- Example 3: Coherence & Logic -->
+            <div class="comparison">
+                <div class="prompt-header">
+                    <div class="prompt-title">
+                        <span class="tag logic">Coherence & Logic</span>
+                        <span class="prompt-text">"The relationship between consciousness and..."</span>
+                    </div>
+                    <span class="target-style">Target: auto (controller chose analytical)</span>
+                </div>
+                
+                <div class="outputs">
+                    <div class="output-block">
+                        <div class="output-label baseline">✗ GPT-2 Raw Output</div>
+                        <div class="status-badge rejected">Low Coherence</div>
+                        <div class="output-text rejected">
+                            "the world is very different but it's still a deep friendship that continues to grow with each generation... people lived together rather than."
+                        </div>
+                        <div class="output-metrics">
+                            <span class="metric-item">Coherence: <span class="metric-value bad">0.20</span></span>
+                            <span class="metric-item">Origin: <span class="metric-value">creative</span></span>
+                        </div>
+                    </div>
+                    
+                    <div class="output-block">
+                        <div class="output-label improved">✓ With ALETHIA + KAIROS</div>
+                        <div class="status-badge accepted">Accepted</div>
+                        <div class="output-text">
+                            "perception is the basic problem... when we think of something happening in our lives—whether through life or on some level inside ourselves—we can ask what follows if the mind's mechanisms are uncertain."
+                        </div>
+                        <div class="output-metrics">
+                            <span class="metric-item">Origin: <span class="metric-value good">analytical</span></span>
+                            <span class="metric-item">Coherence: <span class="metric-value good">0.73</span></span>
+                            <span class="metric-item">Logic: <span class="metric-value good">0.68</span></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="why-section">
+                    <h3>Why this matters</h3>
+                    <p>The controller not only rejects the weak baseline, it produces and accepts a coherent, analytical answer that clears the logic threshold.</p>
+                </div>
+            </div>
+            
+            <!-- Example 4: Recovery -->
+            <div class="comparison">
+                <div class="prompt-header">
+                    <div class="prompt-title">
+                        <span class="tag recovery">Recovery</span>
+                        <span class="prompt-text">"She opened the ancient book and discovered..."</span>
+                    </div>
+                    <span class="target-style">Target: narrative</span>
+                </div>
+                
+                <div class="outputs">
+                    <div class="output-block">
+                        <div class="output-label baseline">✗ GPT-2 Raw Output</div>
+                        <div class="status-badge rejected">Incoherent / Cut-off</div>
+                        <div class="output-text rejected">
+                            "a page that read, 'On how to become an adventurer in The Elder Scrolls.'... until they had been gathered from certain villages or cities such."
+                        </div>
+                        <div class="output-metrics">
+                            <span class="metric-item">Style: <span class="metric-value bad">creative (92%)</span></span>
+                            <span class="metric-item">Narrative prob: <span class="metric-value bad">4%</span></span>
+                        </div>
+                    </div>
+                    
+                    <div class="output-block">
+                        <div class="output-label improved">✓ With ALETHIA + KAIROS</div>
+                        <div class="status-badge abstained">System Fallback</div>
+                        <div class="output-text abstained">
+                            [After 5 attempts the system detected catastrophic generation (perplexity spike ≈ 1000). It sanitized and abstained.]
+                        </div>
+                        <div class="output-metrics">
+                            <span class="metric-item">Decision: <span class="metric-value good">Safe abstention</span></span>
+                            <span class="metric-item">Perplexity: <span class="metric-value bad">1000</span></span>
+                            <span class="metric-item">Attempts: <span class="metric-value">5</span></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="why-section">
+                    <h3>Why this matters</h3>
+                    <p>When generation collapses (loops/cut-offs), the controller detects it and refuses gracefully. That's how you avoid embarrassing outputs in production.</p>
+                </div>
+            </div>
+            
+            <div class="meet-alethia-footer">
+                <p>Benchmarked on GPT-2 base. Controller = Alethia (agent) + KAIROS (assessor) + final gate.</p>
+                <p>Best result: seed s48 reached 56.7% coverage at 71.5% selective quality (ECE 0.126).</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Copy all the JavaScript from MINTverse with updated function names for Alethia
+        
+        /* Blob motion */
+        (function() {
+            const mesh = document.getElementById('gradientMesh');
+            if (!mesh) return;
+            
+            const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (prefersReduced) return;
+            
+            const blobs = [
+                { kx: '--g1x', ky: '--g1y', bx: 30, by: 40, amp: 6, phase: Math.random() * 6.28 },
+                { kx: '--g2x', ky: '--g2y', bx: 70, by: 60, amp: 5, phase: Math.random() * 6.28 },
+                { kx: '--g3x', ky: '--g3y', bx: 50, by: 80, amp: 7, phase: Math.random() * 6.28 },
+                { kx: '--g4x', ky: '--g4y', bx: 40, by: 20, amp: 5, phase: Math.random() * 6.28 },
+            ];
+            
+            blobs.forEach(b => { b.x = b.bx; b.y = b.by; b.vx = 0; b.vy = 0; });
+            
+            let mouseX = 50, mouseY = 50, idle = true, idleTimer;
+            
+            function nudgeIdleOff() {
+                idle = false;
+                clearTimeout(idleTimer);
+                idleTimer = setTimeout(() => idle = true, 1800);
+            }
+            
+            function onPointer(clientX, clientY) {
+                mouseX = (clientX / window.innerWidth) * 100;
+                mouseY = (clientY / window.innerHeight) * 100;
+                nudgeIdleOff();
+            }
+            
+            window.addEventListener('mousemove', e => onPointer(e.clientX, e.clientY), { passive: true });
+            window.addEventListener('touchmove', e => {
+                if (e.touches && e.touches[0]) onPointer(e.touches[0].clientX, e.touches[0].clientY);
+            }, { passive: true });
+            
+            const SPRING = 0.085;
+            const DAMP = 0.82;
+            const PARALLAX = 6;
+            let tPrev = performance.now();
+            
+            function tick(tNow) {
+                const dt = (tNow - tPrev) / 1000;
+                tPrev = tNow;
+                
+                const px = (mouseX - 50) / 50;
+                const py = (mouseY - 50) / 50;
+                
+                blobs.forEach((b, i) => {
+                    const driftX = Math.sin(tNow * 0.0004 + b.phase + i * 0.6) * b.amp;
+                    const driftY = Math.cos(tNow * 0.0005 + b.phase - i * 0.3) * b.amp;
+                    
+                    const targetX = b.bx + driftX + (idle ? 0 : px * PARALLAX);
+                    const targetY = b.by + driftY + (idle ? 0 : py * PARALLAX);
+                    
+                    const ax = (targetX - b.x) * SPRING - b.vx * (1 - DAMP);
+                    const ay = (targetY - b.y) * SPRING - b.vy * (1 - DAMP);
+                    
+                    b.vx += ax;
+                    b.vy += ay;
+                    b.x += b.vx;
+                    b.y += b.vy;
+                    
+                    mesh.style.setProperty(b.kx, b.x.toFixed(2) + '%');
+                    mesh.style.setProperty(b.ky, b.y.toFixed(2) + '%');
+                });
+                
+                requestAnimationFrame(tick);
+            }
+            
+            requestAnimationFrame(tick);
+        })();
+        
+        // Generate floating particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const particleCount = 50;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDuration = (15 + Math.random() * 20) + 's';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animation = `float-up ${particle.style.animationDuration} linear infinite`;
+                particle.style.animationDelay = particle.style.animationDelay;
+                container.appendChild(particle);
+            }
+        }
+        
+        /* Scroll lock */
+        const ScrollLock = (() => {
+            let locked = false;
+            function prevent(e) { e.preventDefault(); }
+            function keyguard(e) {
+                const keys = [32, 33, 34, 35, 36, 37, 38, 39, 40];
+                if (keys.includes(e.keyCode)) e.preventDefault();
+            }
+            return {
+                enable() {
+                    if (locked) return;
+                    locked = true;
+                    document.documentElement.classList.add('intro-lock');
+                    document.body.classList.add('intro-lock');
+                    window.addEventListener('wheel', prevent, { passive: false });
+                    window.addEventListener('touchmove', prevent, { passive: false });
+                    window.addEventListener('keydown', keyguard, { passive: false });
+                },
+                disable() {
+                    if (!locked) return;
+                    locked = false;
+                    document.documentElement.classList.remove('intro-lock');
+                    document.body.classList.remove('intro-lock');
+                    window.removeEventListener('wheel', prevent);
+                    window.removeEventListener('touchmove', prevent);
+                    window.removeEventListener('keydown', keyguard);
+                }
+            };
+        })();
+        
+        let introComplete = false;
+        document.documentElement.classList.add('hide-scrollbar');
+        document.body.classList.add('hide-scrollbar');
+        
+        /* Wrap H2 text */
+        function stageH2() {
+            document.querySelectorAll('.scrub-beat h2').forEach(h2 => {
+                const first = h2.querySelector('.text.gradient-brand-text');
+                if (!first) return;
+                first.classList.add('first-word');
+                if (h2.querySelector('.rest-of-h2')) return;
+                
+                const rest = document.createElement('span');
+                rest.className = 'rest-of-h2';
+                
+                const frag = document.createDocumentFragment();
+                let node = first.nextSibling;
+                while (node) {
+                    const next = node.nextSibling;
+                    frag.appendChild(node);
+                    node = next;
+                }
+                rest.appendChild(frag);
+                h2.appendChild(rest);
+            });
+        }
+        
+        window.addEventListener('load', () => {
+            stageH2();
+            createParticles();
+            ScrollLock.enable();
+            cinematicSequence();
+            setTimeout(() => document.querySelector('.loading-bar')?.remove(), 1800);
+        });
+        
+        function cinematicSequence() {
+            setTimeout(() => {
+                document.getElementById('gradientMesh').classList.add('active');
+            }, 1000);
+            
+            const cards = [
+                document.getElementById('card1'),
+                document.getElementById('card2'),
+                document.getElementById('card3')
+            ];
+            
+            setTimeout(() => {
+                document.getElementById('introContent')?.classList.add('cards-phase');
+            }, 5600);
+            
+            setTimeout(() => { if (!introComplete) cards[0].classList.add('active'); }, 6000);
+            setTimeout(() => {
+                if (!introComplete) { cards[0].classList.remove('active'); cards[1].classList.add('active'); }
+            }, 8500);
+            setTimeout(() => {
+                if (!introComplete) { cards[1].classList.remove('active'); cards[2].classList.add('active'); }
+            }, 11000);
+            setTimeout(() => {
+                if (!introComplete) { cards[2].classList.remove('active'); endIntro(); }
+            }, 13500);
+        }
+        
+        function skipIntro() { introComplete = true; endIntro(); }
+        
+        function endIntro() {
+            const intro = document.getElementById('cinematicIntro');
+            const scrollScrub = document.getElementById('scrollScrub');
+            const halo = document.querySelector('.intro-halo');
+            
+            if (halo) halo.style.display = 'none';
+            intro.classList.add('fade-to-black');
+            
+            setTimeout(() => {
+                intro.classList.add('hide');
+                setTimeout(() => {
+                    intro.classList.add('complete');
+                    ScrollLock.disable();
+                    
+                    scrollScrub.style.display = 'block';
+                    scrollScrub.style.opacity = '0';
+                    setTimeout(() => {
+                        scrollScrub.style.transition = 'opacity .8s cubic-bezier(.4,0,.2,1)';
+                        scrollScrub.style.opacity = '1';
+                        setTimeout(() => {
+                            const beat1 = document.getElementById('beat1');
+                            if (beat1) {
+                                beat1.classList.add('active', 'fade-in');
+                                beat1.addEventListener('animationend', () => beat1.classList.remove('fade-in'), { once: true });
+                            }
+                            initScrollScrub();
+                        }, 200);
+                    }, 300);
+                }, 20);
+            }, 600);
+        }
+        
+        function initScrollScrub() {
+            const scrubSection = document.getElementById('scrollScrub');
+            const beats = ['beat1', 'beat2', 'beat3', 'beat4'].map(id => document.getElementById(id));
+            const steps = beats.length - 1;
+            const vh = () => window.innerHeight;
+            
+            let isTransitioning = false;
+            let currentBeat = 0;
+            
+            function setBeat(i) {
+                if (isTransitioning || i === currentBeat) return;
+                
+                isTransitioning = true;
+                currentBeat = i;
+                
+                beats.forEach(b => b.classList.remove('active'));
+                beats[i].classList.add('active', 'seen');
+                const hint = document.querySelector('.scroll-hint');
+                if (hint) hint.classList.toggle('is-hidden', i === steps);
+                
+                if (beats[i].id === 'beat4') startBeat4();
+                fitBeat4();
+                
+                if (i === steps) {
+                    lockAtEnd();
+                    return;
+                }
+                
+                setTimeout(() => {
+                    isTransitioning = false;
+                }, 800);
+            }
+            
+            let top = 0, height = 0, travel = 0, offsets = [];
+            function compute() {
+                const rect = scrubSection.getBoundingClientRect();
+                top = window.pageYOffset + rect.top;
+                height = scrubSection.offsetHeight;
+                travel = Math.max(1, height - vh());
+                offsets = Array.from({ length: beats.length }, (_, i) => top + (travel * (i / steps)));
+                window.__scrubOffsets = offsets;
+                window.__scrubSteps = steps;
+                window.__scrubRange = { top, travel };
+            }
+            compute();
+            window.addEventListener('resize', compute);
+            
+            let endLocked = false;
+            let scrollTimeout;
+            let lastScrollY = 0;
+            
+            window.addEventListener('scroll', () => {
+                if (endLocked || isTransitioning) return;
+                
+                const y = window.pageYOffset || document.documentElement.scrollTop || 0;
+                
+                clearTimeout(scrollTimeout);
+                
+                scrollTimeout = setTimeout(() => {
+                    if (y < top || y > top + travel) return;
+                    
+                    const progress = (y - top) / travel;
+                    const targetBeat = Math.round(progress * steps);
+                    
+                    if (targetBeat !== currentBeat) {
+                        setBeat(targetBeat);
+                    }
+                }, 50);
+                
+                lastScrollY = y;
+            }, { passive: true });
+            
+            let wheelTimeout;
+            let accumulatedDelta = 0;
+            
+            scrubSection.addEventListener('wheel', (e) => {
+                if (endLocked) {
+                    e.preventDefault();
+                    return;
+                }
+                
+                const y = window.pageYOffset || document.documentElement.scrollTop || 0;
+                if (y < top - 1 || y > top + travel + 1) return;
+                
+                e.preventDefault();
+                
+                accumulatedDelta += e.deltaY;
+                
+                clearTimeout(wheelTimeout);
+                wheelTimeout = setTimeout(() => {
+                    if (isTransitioning) {
+                        accumulatedDelta = 0;
+                        return;
+                    }
+                    
+                    const direction = Math.sign(accumulatedDelta);
+                    accumulatedDelta = 0;
+                    
+                    if (!direction) return;
+                    
+                    const next = Math.max(0, Math.min(steps, currentBeat + direction));
+                    if (next !== currentBeat) {
+                        setBeat(next);
+                        scrollToStep(next);
+                    }
+                }, 100);
+            }, { passive: false });
+            
+            function scrollToStep(i) {
+                if (isTransitioning) return;
+                
+                window.scrollTo({
+                    top: offsets[i],
+                    behavior: 'smooth'
+                });
+            }
+            
+            window.addEventListener('keydown', (e) => {
+                if (endLocked || isTransitioning) return;
+                
+                const keysDown = ['ArrowDown', 'PageDown'];
+                const keysUp = ['ArrowUp', 'PageUp'];
+                
+                if (![...keysDown, ...keysUp].includes(e.key)) return;
+                
+                const y = window.pageYOffset || document.documentElement.scrollTop || 0;
+                if (y < top - 1 || y > top + travel + 1) return;
+                
+                e.preventDefault();
+                const dir = keysUp.includes(e.key) ? -1 : 1;
+                const next = Math.max(0, Math.min(steps, currentBeat + dir));
+                
+                if (next !== currentBeat) {
+                    setBeat(next);
+                    scrollToStep(next);
+                }
+            });
+            
+            beats[0].classList.add('active', 'seen');
+            window.__setEndLocked = (v) => { endLocked = v; };
+        }
+        
+        function scrollHintNext() {
+            const offsets = window.__scrubOffsets;
+            const steps = window.__scrubSteps;
+            const range = window.__scrubRange;
+            if (!offsets || steps == null || !range) return;
+            
+            const y = window.pageYOffset || document.documentElement.scrollTop || 0;
+            const progress = Math.max(0, Math.min(1, (y - range.top) / range.travel));
+            const current = Math.round(progress * steps);
+            const next = Math.min(steps, current + 1);
+            
+            window.scrollTo({ top: offsets[next], behavior: 'smooth' });
+        }
+        
+        let __lockScrollSnap = null;
+        
+        function disableEndLockInputGuards() {
+            if (!window.__endLocked) return;
+            if (window.__endPrevent) {
+                window.removeEventListener('wheel', window.__endPrevent);
+                window.removeEventListener('touchmove', window.__endPrevent);
+            }
+            if (window.__endKeyguard) {
+                window.removeEventListener('keydown', window.__endKeyguard);
+            }
+            if (window.__lockScrollSnap) {
+                window.removeEventListener('scroll', window.__lockScrollSnap);
+            }
+        }
+        
+        function enableEndLockInputGuards() {
+            if (!window.__endLocked) return;
+            const prevent = window.__endPrevent || (e => e.preventDefault());
+            const keyguard = window.__endKeyguard || (e => {
+                const keys = ['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '];
+                if (keys.includes(e.key)) e.preventDefault();
+            });
+            window.__endPrevent = prevent;
+            window.__endKeyguard = keyguard;
+            
+            window.addEventListener('wheel', prevent, { passive: false });
+            window.addEventListener('touchmove', prevent, { passive: false });
+            window.addEventListener('keydown', keyguard, { passive: false });
+            
+            if (window.__lockScrollSnap) {
+                window.addEventListener('scroll', window.__lockScrollSnap, { passive: true });
+            }
+            const lastTop = (window.__scrubOffsets?.[window.__scrubSteps]) ||
+                document.getElementById('scrollScrub').offsetTop;
+            window.scrollTo({ top: lastTop, behavior: 'auto' });
+        }
+        
+        function lockAtEnd() {
+            if (window.__endLocked) return;
+            window.__endLocked = true;
+            if (typeof window.__setEndLocked === 'function') window.__setEndLocked(true);
+            
+            document.documentElement.classList.add('end-lock');
+            document.body.classList.add('end-lock');
+            
+            const lastTop = (window.__scrubOffsets?.[window.__scrubSteps]) ||
+                document.getElementById('scrollScrub').offsetTop;
+            
+            window.scrollTo({ top: lastTop, behavior: 'auto' });
+            
+            const prevent = e => e.preventDefault();
+            const keyguard = (e) => {
+                const keys = ['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '];
+                if (keys.includes(e.key)) e.preventDefault();
+            };
+            window.__endPrevent = prevent;
+            window.__endKeyguard = keyguard;
+            
+            window.addEventListener('wheel', prevent, { passive: false });
+            window.addEventListener('touchmove', prevent, { passive: false });
+            window.addEventListener('keydown', keyguard, { passive: false });
+            
+            __lockScrollSnap = () => {
+                const y = window.pageYOffset || document.documentElement.scrollTop || 0;
+                if (y < lastTop) window.scrollTo({ top: lastTop, behavior: 'auto' });
+            };
+            window.addEventListener('scroll', __lockScrollSnap, { passive: true });
+        }
+        
+        function fitToViewport(el, padTop = 0, padBottom = 0, cssVar = '--beat-scale') {
+            if (!el) return;
+            const prev = el.style.transform;
+            el.style.transform = 'none';
+            const rect = el.getBoundingClientRect();
+            el.style.transform = prev || '';
+            
+            const availW = document.documentElement.clientWidth - 24;
+            const availH = window.innerHeight - (padTop + padBottom);
+            
+            const scaleW = availW / Math.max(1, rect.width);
+            const scaleH = availH / Math.max(1, rect.height);
+            const scale = Math.min(1, scaleW, scaleH);
+            
+            el.style.setProperty(cssVar, Math.max(0.6, scale).toFixed(3));
+        }
+        
+        function fitBeat4() {
+            const beat4 = document.getElementById('beat4');
+            if (!beat4) return;
+            fitToViewport(beat4, 0, 40, '--beat-scale');
+        }
+        
+        function fitMeetAlethia() {
+            const page = document.getElementById('meetAlethiaPage');
+            const content = page?.querySelector('.meet-alethia-content');
+            if (!content) return;
+            const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--about-header-h')) || 64;
+            fitToViewport(content, headerH + 12, 12, '--page-scale');
+        }
+        
+        window.addEventListener('resize', () => {
+            if (document.getElementById('beat4')?.classList.contains('active')) fitBeat4();
+            if (document.getElementById('meetAlethiaPage')?.classList.contains('visible')) fitMeetAlethia();
+        }, { passive: true });
+        
+        function showMeetAlethiaPage(e) {
+            e.preventDefault();
+            disableEndLockInputGuards();
+            
+            const meetAlethiaPage = document.getElementById('meetAlethiaPage');
+            meetAlethiaPage.classList.add('active');
+            createMeetAlethiaParticles();
+            
+            window.__mainScrollY = window.pageYOffset;
+            document.body.style.overflow = 'hidden';
+            document.documentElement.classList.add('end-lock');
+            
+            setTimeout(() => {
+                meetAlethiaPage.classList.add('visible');
+                fitMeetAlethia();
+                requestAnimationFrame(() => fitMeetAlethia());
+            }, 10);
+        }
+        
+        function hideMeetAlethiaPage(e) {
+            e.preventDefault();
+            const meetAlethiaPage = document.getElementById('meetAlethiaPage');
+            
+            meetAlethiaPage.classList.remove('visible');
+            if (!window.__endLocked) {
+                document.documentElement.classList.remove('end-lock');
+            } else {
+                setTimeout(() => enableEndLockInputGuards(), 0);
+            }
+            
+            setTimeout(() => {
+                meetAlethiaPage.classList.remove('active');
+                
+                document.body.style.overflow = '';
+                document.documentElement.classList.remove('end-lock');
+                
+                if (window.__mainScrollY !== undefined) {
+                    window.scrollTo(0, window.__mainScrollY);
+                }
+            }, 600);
+        }
+        
+        function createMeetAlethiaParticles() {
+            const container = document.getElementById('meetAlethiaParticles');
+            if (container.children.length > 0) return;
+            
+            const particleCount = 25;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDuration = (15 + Math.random() * 20) + 's';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animation = `float-up ${particle.style.animationDuration} linear infinite`;
+                particle.style.animationDelay = particle.style.animationDelay;
+                particle.style.opacity = Math.random() * 0.4 + 0.1;
+                container.appendChild(particle);
+            }
+        }
+        
+        const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        let beat4Started = false;
+        
+        function startBeat4() {
+            if (beat4Started) return;
+            beat4Started = true;
+            
+            const beat4 = document.getElementById('beat4');
+            const subtitle = beat4.querySelector('.subtitle');
+            const metricsWrap = beat4.querySelector('.metrics');
+            const primaryMetric = beat4.querySelector('.metric.primary');
+            const secondaryMetrics = [...beat4.querySelectorAll('.metric.secondary')];
+            const numbers = [...beat4.querySelectorAll('.metric-number')];
+            const primaryNumber = primaryMetric.querySelector('.metric-number');
+            const launch = beat4.querySelector('.launch-date');
+            const links = beat4.querySelector('.links');
+            const validation = beat4.querySelector('.validation');
+            
+            const T_PAUSE = 250;
+            const AFTER_H2 = T_PAUSE;
+            const AFTER_SUBTITLE = T_PAUSE;
+            
+            reveal(subtitle, AFTER_H2);
+            setTimeout(() => subtitle.classList.add('underline'), AFTER_H2 + 100);
+            
+            setTimeout(() => {
+                if (prefersReduced) {
+                    numbers.forEach(n => setNumberInstant(n));
+                    primaryMetric.classList.add('show');
+                    secondaryMetrics.forEach(m => m.classList.add('show'));
+                    triggerLaunchSequence(launch, links, validation);
+                    return;
+                }
+                
+                primaryMetric.classList.add('show');
+                countTo(primaryNumber);
+                
+                secondaryMetrics.forEach((m, i) => {
+                    setTimeout(() => {
+                        m.classList.add('show');
+                        const num = m.querySelector('.metric-number');
+                        countTo(num);
+                    }, i * 180);
+                });
+                
+                let completed = 0;
+                numbers.forEach(n => {
+                    n.addEventListener('metric:done', () => {
+                        completed += 1;
+                        if (completed === numbers.length) {
+                            triggerLaunchSequence(launch, links, validation);
+                        }
+                    }, { once: true });
+                });
+            }, AFTER_H2 + AFTER_SUBTITLE);
+        }
+        
+        function triggerLaunchSequence(launch, links, validation) {
+            if (!launch) return;
+            launch.classList.add('underline', 'show-text');
+            reveal(links, 800);
+            setTimeout(() => validation.classList.add('show'), 1050);
+        }
+        
+        function reveal(el, delay = 0) {
+            if (!el) return;
+            setTimeout(() => el.classList.add('show'), delay);
+        }
+        
+        function setNumberInstant(el) {
+            const target = parseFloat(el.dataset.target || '0');
+            const decimals = parseInt(el.dataset.decimals || '0', 10);
+            const suffix = el.dataset.suffix || '';
+            el.textContent = formatNumber(target, decimals) + suffix;
+        }
+        
+        function countTo(el) {
+            const start = 0;
+            const target = parseFloat(el.dataset.target || '0');
+            const decimals = parseInt(el.dataset.decimals || '0', 10);
+            const suffix = el.dataset.suffix || '';
+            const duration = Math.max(400, parseInt(el.dataset.duration || '1600', 10));
+            const startTime = performance.now();
+            
+            function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+            
+            function frame(now) {
+                const t = Math.min(1, (now - startTime) / duration);
+                const eased = easeOutCubic(t);
+                const value = start + (target - start) * eased;
+                el.textContent = formatNumber(value, decimals) + suffix;
+                if (t < 1) {
+                    requestAnimationFrame(frame);
+                } else {
+                    el.textContent = formatNumber(target, decimals) + suffix;
+                    el.classList.add('sheen');
+                    setTimeout(() => el.classList.remove('sheen'), 1300);
+                    el.dispatchEvent(new CustomEvent('metric:done', { bubbles: true }));
+                }
+            }
+            requestAnimationFrame(frame);
+        }
+        
+        function formatNumber(value, decimals) {
+            try {
+                const fmt = new Intl.NumberFormat(undefined, {
+                    minimumFractionDigits: decimals,
+                    maximumFractionDigits: decimals
+                });
+                return fmt.format(Number(value));
+            } catch (e) {
+                return Number(value).toFixed(decimals);
+            }
+        }
+        
+        window.addEventListener('load', () => {
+            createParticles();
+            ScrollLock.enable();
+            cinematicSequence();
+            
+            setTimeout(() => {
+                const loadingBar = document.querySelector('.loading-bar');
+                if (loadingBar) {
+                    loadingBar.style.display = 'none';
+                }
+            }, 1800);
+        });
+    </script>
+</body>
+</html>
