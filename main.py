@@ -12,7 +12,6 @@ import torch.nn.functional as F
 from transformers import GPT2LMHeadModel, GPT2Tokenizer
 import matplotlib.pyplot as plt
 
-# ---------------------------- Global config ----------------------------
 try:
     import warnings
     warnings.filterwarnings("ignore")
