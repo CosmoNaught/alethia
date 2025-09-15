@@ -43,7 +43,6 @@ def set_seeds(seed: int):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-# ---------------------------- Quality Controller ----------------------------
 class QualityController:
     def __init__(self):
         self.quality_history = []
@@ -87,7 +86,6 @@ class QualityController:
         self.perplexity_baseline = (1-a)*self.perplexity_baseline + a*perplexity
         self.coherence_baseline = (1-a)*self.coherence_baseline + a*coherence
 
-# ---------------------------- Memory ----------------------------
 @dataclass
 class EmergentMemory:
     text: str
@@ -106,7 +104,6 @@ class EmergentMemory:
     recovery_count: int = 0
     generation_time: float = 0.0
 
-# ---------------------------- Prompt/Style managers ----------------------------
 class PromptManager:
     VALID_STYLES = {"analytical","creative","narrative"}
     def __init__(self, path: Optional[str], seed: int, split_ratios=(0.7,0.1,0.2)):
@@ -186,7 +183,6 @@ class StyleCorpus:
         self.test=[rows[i] for i in idxs[n_tr+n_va:]]
         self.has_file=True
 
-# ---------------------------- Alethia GPT-2 model ----------------------------
 class AlethiaGPT2Model(nn.Module):
     def __init__(self, model_name="gpt2", latent_dim=64):
         super().__init__()
@@ -236,7 +232,6 @@ class AlethiaAgent:
         self.model.eval()
         self.tokenizer = GPT2Tokenizer.from_pretrained(model_name)
         self.tokenizer.pad_token = self.tokenizer.eos_token
-        # independent perplexity model
         self.perp_model = GPT2LMHeadModel.from_pretrained(perplexity_model_name).to(DEVICE)
         self.perp_model.eval()
         self.perp_tok = GPT2Tokenizer.from_pretrained(perplexity_model_name)
@@ -245,7 +240,6 @@ class AlethiaAgent:
         self.memories: List[EmergentMemory] = []; self.clock=0
         self.quality_controller = QualityController()
 
-        # Built-in prompts if none provided
         self.style_prompts_builtin = {
             "analytical": ["Analysis reveals that ", "The evidence demonstrates ", "Research indicates ",
                            "Data analysis shows ", "Studies confirm that ", "The methodology involves "],
@@ -263,13 +257,11 @@ class AlethiaAgent:
         else:
             self.style_prompts = self.style_prompts_builtin
 
-        # Train heads from corpus if provided, else bootstrap tiny
         if style_corpus and style_corpus.has_file:
             self._train_mode_heads_from_corpus(style_corpus)
         else:
             self._train_mode_heads_bootstrap()
 
-    # ---- style heads training ----
     def _train_mode_heads_bootstrap(self):
         enc=[]; vprint("[Heads] Bootstrap training")
         with torch.no_grad():
@@ -343,7 +335,6 @@ class AlethiaAgent:
             if pat>=10: break
         for h in (self.model.analytical_head,self.model.creative_head,self.model.narrative_head): h.eval()
 
-    # ---- generation ----
     def generate(self, prompt: Optional[str]=None, max_length: int=50, temperature: float=0.9,
                  style: Optional[str]=None, self_state_bias: Optional[torch.Tensor]=None,
                  attempt: int=0, no_self_bias: bool=False) -> EmergentMemory:
@@ -451,7 +442,6 @@ class AlethiaAgent:
         except Exception:
             return {"analytical":0.33, "creative":0.33, "narrative":0.34}
 
-# ---------------------------- KAIROS Assessor ----------------------------
 class KAIROSAssessor:
     def __init__(self, hidden_dim=768, latent_dim=64, no_keywords_logic: bool=False):
         self.hidden_dim=hidden_dim; self.latent_dim=latent_dim
@@ -525,7 +515,6 @@ class KAIROSAssessor:
         if memory.recovery_count>0: assessment["flags"].append(f"recovered_{memory.recovery_count}")
         return assessment
 
-    # Optional: supervised training on correctness labels
     def train_confidence(self, z_feats: List[torch.Tensor], probs: List[List[float]], labels: List[int],
                          val_split=0.2, seed=42, max_epochs=50):
         if not z_feats: return
@@ -568,7 +557,6 @@ class KAIROSAssessor:
             if abs(lr*grad)<1e-6: break
         self.temp=float(math.exp(x)); self.calibrated=True; return self.temp
 
-# ---------------------------- Metacognitive system ----------------------------
 class MetacognitiveGPT2System:
     def __init__(self, model_name="gpt2", seed=42, perplexity_model_name="gpt2-medium",
                  style_corpus: Optional[StyleCorpus] = None,
@@ -715,7 +703,6 @@ class MetacognitiveGPT2System:
         z=z/(torch.norm(z)+1e-8); s=self.self_vec/(torch.norm(self.self_vec)+1e-8)
         return float(torch.dot(z,s).item())
 
-# ---------------------------- Benchmark utilities ----------------------------
 @dataclass
 class SampleLog:
     arm: str; seed: int; idx: int; prompt: Optional[str]; target_style: Optional[str];
@@ -758,7 +745,6 @@ def bootstrap_ci(vals: List[float], iters=2000, alpha=0.05):
         s=rng.choice(arr, size=len(arr), replace=True); samples.append(float(np.mean(s)))
     lo,hi=np.percentile(samples, [100*alpha/2, 100*(1-alpha/2)]); return float(lo),float(hi)
 
-# Simple AUROC (no sklearn)
 def auroc(scores: List[float], labels: List[int]) -> float:
     pairs=sorted(zip(scores, labels), key=lambda x:x[0])
     pos=sum(labels); neg=len(labels)-pos
@@ -769,7 +755,6 @@ def auroc(scores: List[float], labels: List[int]) -> float:
     auc=(s_pos - pos*(pos+1)/2) / (pos*neg)
     return float(auc)
 
-# ---------------------------- Emergent QA proof harness ----------------------------
 def load_qa(path: str) -> List[Dict[str,str]]:
     p=Path(path)
     if not p.exists(): raise FileNotFoundError(f"QA file not found: {p}")
@@ -780,7 +765,7 @@ def load_qa(path: str) -> List[Dict[str,str]]:
             for r in reader:
                 q=(r.get("question") or "").strip(); a=(r.get("answer") or "").strip(); t=(r.get("type") or "exact").strip().lower()
                 if q and a: rows.append({"question":q,"answer":a,"type":t})
-    else: # jsonl
+    else:
         with p.open("r", encoding="utf-8") as f:
             for line in f:
                 if not line.strip(): continue
@@ -800,7 +785,7 @@ def extract_answer(text: str, kind: str) -> str:
         nums=re.findall(r'[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?', t)
         return nums[-1] if nums else ""
     if kind=="regex":
-        return t  # will be matched by regex in checker
+        return t 
     return normalize_text(t)
 
 def is_correct(output: str, gt: str, kind: str) -> bool:
@@ -819,20 +804,13 @@ def is_correct(output: str, gt: str, kind: str) -> bool:
     return normalize_text(output)==normalize_text(gt)
 
 def emergent_confidence(k_outputs: List[str], kind: str, perp: float) -> Tuple[str,float]:
-    """
-    Returns (chosen_answer, confidence) using self-consistency.
-    - For mcq/numeric: extract atomic answers and vote.
-    - For exact/regex: normalize then 1 - pairwise disagreement (Jaccard on word sets).
-    """
     if not k_outputs: return "", 0.0
     atoms=[extract_answer(o, kind) for o in k_outputs]
-    # Choose the modal atom (fallback to first)
     counts={}
     for a in atoms: counts[a]=counts.get(a,0)+1
     chosen=max(counts.items(), key=lambda kv: kv[1])[0] if counts else atoms[0]
     agree=counts.get(chosen,0)/max(1,len(atoms))
-    # entropy/perplexity smoothing
-    perp_term=1.0/(1.0+max(0.0, perp-15.0)/50.0)  # ~1 when perp<=15, decays afterwards
+    perp_term=1.0/(1.0+max(0.0, perp-15.0)/50.0)
     conf=float(np.clip(0.15 + 0.7*agree + 0.15*perp_term, 0.0, 0.999))
     return chosen, conf
 
@@ -841,19 +819,15 @@ def run_proof(args):
     data=load_qa(args.qa)
     if len(data)<30:
         print(f"[ERROR] Need >=30 QA items, got {len(data)}"); sys.exit(2)
-    # Deterministic split
     idx=list(range(len(data))); rng=random.Random(args.seed); rng.shuffle(idx)
     n=len(idx); n_tr=int(n*0.6); n_va=int(n*0.2); n_te=n - n_tr - n_va
     tr_idx=idx[:n_tr]; va_idx=idx[n_tr:n_tr+n_va]; te_idx=idx[n_tr+n_va:]
     train=[data[i] for i in tr_idx]; val=[data[i] for i in va_idx]; test=[data[i] for i in te_idx]
-
-    # Build system
     system_full=MetacognitiveGPT2System(model_name=args.model, seed=args.seed, perplexity_model_name=args.perp_model,
                                         no_self_bias=False, no_fallback=False, no_keywords_logic=True)
     system_noself=MetacognitiveGPT2System(model_name=args.model, seed=args.seed, perplexity_model_name=args.perp_model,
                                           no_self_bias=True, no_fallback=False, no_keywords_logic=True)
 
-    # Helper to answer a question with K samples and compute emergent confidence
     def answer_with_system(q: Dict[str,str], system: MetacognitiveGPT2System, K: int) -> Tuple[str,float,int,float]:
         k_texts=[]; perps=[]
         for _ in range(K):
@@ -862,12 +836,10 @@ def run_proof(args):
         chosen, conf = emergent_confidence(k_texts, q["type"], float(np.median(perps)))
         return chosen, conf, int(len(k_texts)), float(np.median(perps))
 
-    # Validation: choose threshold tau that maximizes expected utility
     val_scores=[]; val_labels=[]
     for q in val:
         out, conf, _, _ = answer_with_system(q, system_full, args.k if args.k>1 else 1)
         label=int(is_correct(out, q["answer"], q["type"])); val_scores.append(conf); val_labels.append(label)
-    # Utility: accept if conf>=tau; payoffs
     taus=np.linspace(0.4, 0.95, 20)
     def expected_utility(scores, labels, tau):
         util=[]
@@ -880,17 +852,14 @@ def run_proof(args):
     util_by_tau=[(float(t), expected_utility(val_scores, val_labels, float(t))) for t in taus]
     tau_star=max(util_by_tau, key=lambda kv: kv[1])[0]
 
-    # TEST: full system, noself ablation, and K=1 ablation
     def eval_split(split, system, K):
         scores=[]; labels=[]; base_util=[]
         for q in split:
             out, conf, _, _ = answer_with_system(q, system, K)
             lab=int(is_correct(out, q["answer"], q["type"]))
             scores.append(conf); labels.append(lab)
-            # accept-all baseline utility
             base_util.append(1.0 if lab==1 else args.wrong_penalty)
         auc=auroc(scores, labels)
-        # Opt-out with tau_star chosen on VAL
         util=[]
         for s,l in zip(scores, labels):
             if args.allow_opt_out and s<tau_star:
@@ -905,7 +874,6 @@ def run_proof(args):
     res_noself = eval_split(test, system_noself, args.k if args.k>1 else 1)
     res_k1     = eval_split(test, system_full,   1)  # K=1 (no self-consistency)
 
-    # CIs for AUC via bootstrap
     def auc_boot(scores, labels, iters=1000):
         rng=np.random.default_rng(7); N=len(scores); vals=[]
         for _ in range(iters):
@@ -913,9 +881,7 @@ def run_proof(args):
             vals.append(auroc([scores[i] for i in idx],[labels[i] for i in idx]))
         return float(np.percentile(vals,2.5)), float(np.percentile(vals,97.5))
     auc_lo, auc_hi = auc_boot(res_full["scores"], res_full["labels"])
-    # Utility gain vs accept-all
     gain = res_full["opt_util"] - res_full["accept_all_util"]
-    # Gain CI via paired bootstrap
     def paired_gain_ci(scores, labels, tau, iters=1000):
         rng=np.random.default_rng(9); N=len(scores); vals=[]
         for _ in range(iters):
@@ -933,10 +899,8 @@ def run_proof(args):
         return float(np.percentile(vals,2.5)), float(np.percentile(vals,97.5))
     gain_lo, gain_hi = paired_gain_ci(res_full["scores"], res_full["labels"], tau_star)
 
-    # Ablation deltas (AUC drops)
     delta_noself = res_full["auc"] - res_noself["auc"]
     delta_k1     = res_full["auc"] - res_k1["auc"]
-    # CIs via paired bootstrap
     def delta_auc_ci(scoresA, labelsA, scoresB, labelsB, iters=1000):
         rng=np.random.default_rng(11); N=len(scoresA); vals=[]
         for _ in range(iters):
@@ -948,7 +912,6 @@ def run_proof(args):
     dnos_lo,dnos_hi = delta_auc_ci(res_full["scores"],res_full["labels"],res_noself["scores"],res_noself["labels"])
     dk1_lo, dk1_hi  = delta_auc_ci(res_full["scores"],res_full["labels"],res_k1["scores"],res_k1["labels"])
 
-    # Print preregistered summary
     print("\n=== PROOF (single-seed, preregistered) ===")
     print(f"Seed: {args.seed} | K={args.k} | tau* (chosen on VAL) = {tau_star:.3f}")
     print(f"[FULL]   AUROC = {res_full['auc']:.3f}  (95% CI {auc_lo:.3f}, {auc_hi:.3f})")
@@ -957,16 +920,12 @@ def run_proof(args):
     print(f"[ABLATE] ΔAUC (vs no_self_bias) = {delta_noself:.3f}  (95% CI {dnos_lo:.3f}, {dnos_hi:.3f})")
     print(f"[ABLATE] ΔAUC (vs K=1)          = {delta_k1:.3f}  (95% CI {dk1_lo:.3f}, {dk1_hi:.3f})")
 
-    # PASS/FAIL checks
     pass_auc = (res_full["auc"]>=0.70) and (auc_lo>=0.60)
     pass_gain = (gain>=0.10) and (gain_lo>0.0)
     pass_delta = (delta_noself>=0.10 and dnos_lo>=0.05) and (delta_k1>=0.10 and dk1_lo>=0.05)
     ok = pass_auc and pass_gain and pass_delta
-    print("\nVERDICT:", "PASS ✅" if ok else "FAIL ❌")
-    # Exit code reflects verdict for CI systems
+    print("\nVERDICT:", "PASS" if ok else "FAIL")
     sys.exit(0 if ok else 3)
-
-# ---------------------------- Bench arms ----------------------------
 
 def run_arm_baseline(model_name: str, seed: int, tests, perp_model="gpt2-medium",
                      style_corpus: Optional[StyleCorpus]=None, prompt_manager: Optional[PromptManager]=None):
@@ -1132,7 +1091,6 @@ def plot_coherence_hist(rows_logs, outdir: Path, bins=20):
         plt.xlabel("Coherence score"); plt.ylabel("Count"); plt.title(f"Coherence distribution — {arm}")
         plt.legend(); plt.tight_layout(); plt.savefig(outdir/f"coherence_hist_{arm}.png", dpi=160)
 
-# ---------------------------- CLI subcommands ----------------------------
 def cmd_demo(args):
     pm=PromptManager(args.prompts, seed=args.seed, split_ratios=tuple(args.split_ratios)) if args.prompts else None
     sc=StyleCorpus(args.style_corpus, seed=args.seed, split=(0.8,0.1,0.1)) if args.style_corpus else None
@@ -1174,7 +1132,6 @@ def _pretty_gate_reasons(ass, target_style, min_conf, min_coh, min_logic):
     return reasons
 
 def _mk_show_prompts(pm, n):
-    # Small, human-friendly set if no prompts file; otherwise use TEST split deterministically.
     base = [
         ("The fundamental principles of machine learning include", "analytical"),
         ("She opened the ancient book and discovered", "narrative"),
@@ -1187,7 +1144,6 @@ def _mk_show_prompts(pm, n):
     return base[:n]
 
 def cmd_showcase(args):
-    # Build managers and systems
     pm = PromptManager(args.prompts, seed=args.seed, split_ratios=tuple(args.split_ratios)) if args.prompts else None
     sc = StyleCorpus(args.style_corpus, seed=args.seed, split=(0.8,0.1,0.1)) if args.style_corpus else None
 
@@ -1208,33 +1164,28 @@ def cmd_showcase(args):
 
     for idx, (prompt, style) in enumerate(tests, 1):
         t0 = time.time()
-        # RAW (no control loop)
         raw_mem = agent.generate(prompt=prompt, style=style, max_length=args.max_len, temperature=0.9, attempt=0)
-        raw_ass = KAIROSAssessor().assess(raw_mem)  # score for explanation only
+        raw_ass = KAIROSAssessor().assess(raw_mem)
 
-        # CONTROLLED
         res = system.generate_with_metacognition(prompt=prompt, target_style=style, max_length=args.max_len, verbose=False)
         ass = res["assessment"]; txt = res["text"]
         passed = final_gate_pass(txt, ass, style,
                                  min_conf=args.min_conf, min_coh=args.min_coh, min_logic=args.min_logic)
         reasons = _pretty_gate_reasons(ass, style, args.min_conf, args.min_coh, args.min_logic)
 
-        # Compose markdown block
         title_style = style if style else "[auto]"
         md.append(f"\n## {idx}) Prompt (target={title_style}):\n> {prompt or '*[auto seed opener]*'}\n")
-        md.append(f"**Decision:** {'✅ Accepted' if passed else '🛑 Abstained'}  \n"
+        md.append(f"**Decision:** {'Accepted' if passed else 'Abstained'}  \n"
                   f"**Why:** {', '.join(reasons)}  \n"
                   f"**Origin (estimated):** {ass.get('origin')}  \n"
                   f"**Confidence/Coherence/Logic/Perplexity:** "
                   f"{ass.get('confidence'):.2f} / {ass.get('coherence'):.2f} / "
                   f"{ass.get('logic'):.2f} / {ass.get('perplexity'):.1f}\n")
         md.append(f"**ALETHIA output:**\n\n{txt}\n")
-        # Show a short raw baseline for contrast (truncate so it's readable)
         raw_txt = raw_mem.text.strip().replace("\n"," ")
         if len(raw_txt) > 350: raw_txt = raw_txt[:350] + "..."
         md.append(f"<details><summary>Raw GPT-2 (no gating)</summary>\n\n{raw_txt}\n\n</details>\n")
 
-    # Write file
     (outdir / "showcase.md").write_text("\n".join(md), encoding="utf-8")
     print(f"\nWrote: {outdir / 'showcase.md'}", flush=True)
 
