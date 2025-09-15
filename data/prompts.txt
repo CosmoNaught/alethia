@@ -1,0 +1,324 @@
+# ALETHIA+KAIROS Prompts File
+# Format: prompt || style, | style, or prompt alone
+# 300 lines total: 180 with prompt||style, 60 style-only, 60 no-style
+
+# Analytical prompts with style tag (60 lines)
+The statistical relationship between variables X and Y reveals || analytical
+Research methodologies in contemporary science emphasize || analytical
+The fundamental theorem demonstrates that || analytical
+Empirical evidence from longitudinal studies indicates || analytical
+When examining the correlation coefficients, we observe || analytical
+The null hypothesis can be rejected because || analytical
+Meta-analysis of recent publications shows || analytical
+The regression model predicts outcomes based on || analytical
+Quantitative assessment of the intervention reveals || analytical
+The control group exhibited significantly different || analytical
+Data triangulation from multiple sources confirms || analytical
+The experimental design accounts for confounding variables through || analytical
+Systematic review of the literature demonstrates || analytical
+The confidence interval suggests that || analytical
+Factor analysis reveals underlying constructs that || analytical
+The p-value of 0.02 indicates || analytical
+Comparative analysis between treatment groups shows || analytical
+The effect size measurement demonstrates || analytical
+Statistical power calculations suggest || analytical
+The variance in the dataset can be attributed to || analytical
+Epidemiological patterns indicate a clear trend toward || analytical
+The diagnostic accuracy achieves || analytical
+Time-series analysis reveals seasonal patterns in || analytical
+The mathematical model incorporates variables such as || analytical
+Cost-benefit analysis demonstrates favorable returns when || analytical
+The reliability coefficient indicates || analytical
+Network analysis identifies key nodes that || analytical
+The dose-response relationship follows || analytical
+Cluster analysis reveals distinct subgroups characterized by || analytical
+The Bayesian approach incorporates prior knowledge to || analytical
+Performance metrics indicate improvement in || analytical
+Content analysis of the documents reveals || analytical
+Survival analysis shows median time to || analytical
+The multi-level model accounts for || analytical
+Benchmarking against industry standards places || analytical
+The simulation converges after || analytical
+Psychometric evaluation confirms || analytical
+The ecological study reveals associations between || analytical
+Machine learning classification achieves || analytical
+The cohort study demonstrates relative risk of || analytical
+Budget analysis indicates potential savings through || analytical
+The experimental results replicate across || analytical
+Linguistic analysis of the corpus reveals || analytical
+The power analysis suggests sample size of || analytical
+Variance decomposition attributes changes to || analytical
+Path analysis demonstrates both direct and indirect || analytical
+The compliance rate meets predetermined thresholds when || analytical
+Genetic association studies identify loci that || analytical
+Market analysis projects growth rates of || analytical
+The usability testing reveals task completion at || analytical
+Environmental impact assessment quantifies || analytical
+The clinical trial demonstrates non-inferiority with || analytical
+Attribution modeling assigns conversion credit to || analytical
+The acoustic analysis identifies frequency patterns || analytical
+Demographic projections indicate population changes || analytical
+The efficiency analysis reveals potential improvements || analytical
+Risk stratification successfully categorizes || analytical
+The nutritional analysis confirms adequate levels || analytical
+Supply chain analysis identifies critical dependencies || analytical
+The behavioral study documents consistent patterns || analytical
+Define overfitting in machine learning in one sentence || analytical
+State the Pythagorean theorem || analytical
+Summarise in two sentences why the sky appears blue || analytical
+Explain the Riemann Hypothesis in simple terms || analytical
+
+# Creative prompts with style tag (60 lines)
+Beyond the kaleidoscope of infinite possibilities || creative
+The moon whispers secrets to the dancing shadows while || creative
+In gardens where time flows backward || creative
+Colors that have no names begin to || creative
+The symphony of silence echoes through || creative
+Dreams fold themselves into origami birds and || creative
+Where starlight pools in forgotten corners || creative
+The architecture of clouds reveals || creative
+Beneath layers of painted sky || creative
+The ocean dreams in languages unknown when || creative
+Through windows made of crystallized music || creative
+The texture of tomorrow feels like || creative
+In the space between heartbeats lives || creative
+Rivers of light flow upward toward || creative
+The clockmaker's daughter discovered that time || creative
+Inside the mirror's reflection grows || creative
+In a city made of clocks, time grows on trees || creative
+The library of unwritten books contains || creative
+When gravity forgets its purpose || creative
+The collector of lost thoughts found || creative
+In the museum of extinct colors || creative
+The mapmaker drew territories that || creative
+Shadows learn to dance independently when || creative
+The garden where words bloom into || creative
+Through keyholes in the sky appear || creative
+The mathematician who counted infinities discovered || creative
+In bottles made of frozen music float || creative
+The seamstress who stitches dreams together || creative
+Where echoes go to remember || creative
+The painter whose brushes leak tomorrow || creative
+Inside cocoons of liquid starlight || creative
+The architect of impossible spaces builds || creative
+When metaphors become literal || creative
+The keeper of untold stories guards || creative
+In forests made entirely of whispers grow || creative
+The clockwork heart beats in rhythms of || creative
+Through telescopes that see inward || creative
+The rain speaks in alphabets that || creative
+In theaters where shadows perform || creative
+The weaver of northern lights creates || creative
+Between the pages of unread books live || creative
+The museum of discarded wishes displays || creative
+When colors learn to sing || creative
+The cartographer of emotions maps || creative
+Inside storms made of butterflies || creative
+The librarian of forgotten languages preserves || creative
+Where moonbeams crystallize into || creative
+The sculptor of empty spaces shapes || creative
+In gardens tended by starlight bloom || creative
+The collector of last words keeps || creative
+Through doors that open inward to everywhere || creative
+The orchestra of sleeping cities plays || creative
+When mathematics becomes poetry || creative
+The keeper of lost keys knows || creative
+In rooms furnished with solidified music || creative
+The translator of silence interprets || creative
+Where horizons fold into themselves || creative
+The merchant of borrowed time sells || creative
+Inside raindrops live entire worlds that || creative
+The curator of impossible things arranges || creative
+Through windows painted on air || creative
+
+# Narrative prompts with style tag (60 lines)
+She opened the unmarked envelope and found || narrative
+The last customer of the night always ordered || narrative
+Marcus had never seen the door before, but || narrative
+Every morning at 3:47 AM, the phone would || narrative
+The photograph was wrong in a way that || narrative
+When the power went out, Sarah noticed || narrative
+The inheritance included three unusual items || narrative
+David's reflection had started to || narrative
+The new neighbor only came out when || narrative
+At the bottom of grandmother's trunk lay || narrative
+The GPS kept insisting they turn into || narrative
+Julia's diary had started writing itself || narrative
+The elevator sometimes went to floors that || narrative
+Every teacher at the school knew about || narrative
+The fortune cookie contained something impossible || narrative
+Thomas noticed his shadow was || narrative
+The bookstore only appeared on || narrative
+Everyone in town remembered the day when || narrative
+The museum guard had one simple rule || narrative
+Lisa's daughter claimed her imaginary friend || narrative
+The train that didn't exist arrived || narrative
+In the attic, hidden behind old portraits || narrative
+The radio played tomorrow's news || narrative
+Michael's watch had started running || narrative
+The cat came back, but it brought || narrative
+No one talked about what happened at || narrative
+The yard sale painting revealed || narrative
+Emma discovered her autobiography || narrative
+The hotel room came with instructions || narrative
+She opened the old radio and found || narrative
+The old woman at the bus stop always || narrative
+Kevin's dreams were being broadcast on || narrative
+The text message from the future said || narrative
+Every mirror in the house showed || narrative
+The lighthouse keeper left one final || narrative
+Anna's childhood drawings were || narrative
+The waiting room was full of people who || narrative
+The snow globe on the shelf contained || narrative
+Charlie realized the birds were || narrative
+The lost and found box held items from || narrative
+The substitute teacher looked exactly like || narrative
+Mom's recipe box included instructions for || narrative
+The crosswalk signal counted down from || narrative
+Every door in the neighborhood led to || narrative
+The barber shop mirrors showed customers || narrative
+The vending machine dispensed items from || narrative
+Patricia's phone autocorrected everything to || narrative
+The sunrise came from the west when || narrative
+The janitor always cleaned before || narrative
+Clara's car radio picked up calls from || narrative
+The office printer only worked when || narrative
+The parking meter accepted payment in || narrative
+The church bells rang thirteen times || narrative
+Mike's grocery receipts listed || narrative
+The movie theater's exit door led to || narrative
+Linda's doorbell rang with || narrative
+The ATM dispensed bills from || narrative
+Tom's shadow was exactly || narrative
+The library's return slot led to || narrative
+The new streetlights illuminated || narrative
+The cafeteria served lunch from || narrative
+The hotel elevator's thirteenth floor || narrative
+
+# Style-only analytical (20 lines)
+| analytical
+| analytical
+| analytical
+| analytical
+| analytical
+| analytical
+| analytical
+| analytical
+| analytical
+| analytical
+| analytical
+| analytical
+| analytical
+| analytical
+| analytical
+| analytical
+| analytical
+| analytical
+| analytical
+| analytical
+
+# Style-only creative (20 lines)
+| creative
+| creative
+| creative
+| creative
+| creative
+| creative
+| creative
+| creative
+| creative
+| creative
+| creative
+| creative
+| creative
+| creative
+| creative
+| creative
+| creative
+| creative
+| creative
+| creative
+
+# Style-only narrative (20 lines)
+| narrative
+| narrative
+| narrative
+| narrative
+| narrative
+| narrative
+| narrative
+| narrative
+| narrative
+| narrative
+| narrative
+| narrative
+| narrative
+| narrative
+| narrative
+| narrative
+| narrative
+| narrative
+| narrative
+| narrative
+
+# No style specification (60 lines)
+The relationship between consciousness and perception
+When examining the nature of reality
+The fundamental principles that govern
+In the space between thoughts
+The question of whether machines can
+Beyond the boundaries of conventional thinking
+The intersection of art and science reveals
+Through careful observation, we discover
+The paradox of existence suggests
+When systems reach critical complexity
+The emergence of patterns from chaos
+Inside the quantum realm
+The nature of time itself
+Between order and entropy lies
+The evolution of ideas follows
+Where philosophy meets empirical evidence
+The threshold of understanding
+In moments of profound clarity
+The architecture of thought
+When possibilities collapse into
+The mechanism behind consciousness
+Through iterative processes emerge
+The boundary between self and other
+In the margins of perception
+The recursive nature of awareness
+When information becomes knowledge
+The substrate of reality
+Between cause and effect
+The topology of meaning
+Where language fails to capture
+The dynamics of complex systems
+In states of superposition
+The observer effect demonstrates
+When patterns become predictions
+The scaffolding of cognition
+Through layers of abstraction
+The interface between mind and matter
+In domains yet unexplored
+The currency of attention
+When entropy decreases locally
+The grammar of the universe
+Between signal and noise
+The algebra of consciousness
+In fields of pure potential
+The syntax of existence
+When emergence transcends components
+The calculus of change
+Through frameworks of understanding
+The geometry of thought
+In landscapes of possibility
+The frequency of resonance
+When coherence emerges from
+The wavelength of awareness
+Between discrete and continuous
+The amplitude of experience
+In spectrums yet unmeasured
+The harmonics of being
+When synchronicity appears
+The rhythm of becoming
+Through phases of transformation

@@ -4,3 +4,5 @@ __pycache__/
 outbench_big/
 runs/
 run.sh
+validate.sh
+.out
